@@ -238,7 +238,7 @@ public:
         if (!m_EventRaised && m_WasEventState && oldState == newState) {
             if (m_EventTimeout.IsElapsed(false)) {
                 m_EventRaised = true;
-                m_Callback(button, *this, oldState, oldStateMillis);
+                m_Callback(button, *this, oldState, oldStateMillis, m_CallbackUserData);
             }
         } 
     }
