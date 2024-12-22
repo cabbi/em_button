@@ -1,6 +1,6 @@
 {
   "name": "EmButton",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Embedded Button with events handling",
   "keywords": ["button", "events", "gpio"],
   "repository": {
