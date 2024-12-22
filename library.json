@@ -1,0 +1,20 @@
+{
+  "name": "EmButton",
+  "version": "1.0.0",
+  "description": "Embedded Button with events handling",
+  "keywords": ["button", "events", "gpio"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cabbi/em_button.git"
+  },
+  "authors": {
+    "name": "Fabio Cabella",
+    "maintainer": true
+  },
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "cabbi/EmCore": "~1.0.6"
+  },  
+  "frameworks": ["arduino"],
+  "platforms": "*"
+}
