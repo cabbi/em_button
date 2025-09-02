@@ -45,5 +45,5 @@ void setup() {
 
 void loop() {
     // Updates the buttons status
-    updater.Update();
+    updater.update();
 }

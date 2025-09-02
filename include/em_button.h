@@ -2,6 +2,7 @@
 #define EM_BUTTON_H
 
 #include "em_defs.h"
+#include "em_threading.h"
 #include "em_button_defs.h"
 #include "em_button_event.h"
 
@@ -11,46 +12,46 @@ public:
     EmButton(EmButtonEvent* events[],
              EmBtnSize eventsCount,
              EmButtonState initialState=EmButtonState::up)
-     : m_CurrentState(initialState),
-       m_CurrentStateMillis(0),
-       m_Events(events),
-       m_EventsCount(eventsCount) { }
+     : m_currentState(initialState),
+       m_currentStateMillis(0),
+       m_events(events),
+       m_eventsCount(eventsCount) { }
 
     // Sets the button state.
     // This method will eventually raise the defined events
-    void SetState(EmButtonState state);
+    void setState(EmButtonState state);
 
     // Gets the button state.
-    EmButtonState GetState() const {
-        return m_CurrentState;
+    EmButtonState getState() const {
+        return m_currentState;
     }
 
-    virtual void Update() override;
+    virtual void update() override;
 
-    EmButtonState GetCurrentState() const {
-        return m_CurrentState;
+    EmButtonState getCurrentState() const {
+        return m_currentState;
     }
 
-    uint32_t GetCurrentStateMillis() const {
-        return m_CurrentStateMillis;
+    uint32_t getCurrentStateMillis() const {
+        return m_currentStateMillis;
     }
 
-    EmBtnSize GetEventsCount() const {
-        return m_EventsCount;
+    EmBtnSize getEventsCount() const {
+        return m_eventsCount;
     }
 
-    EmButtonEvent* GetEvent(EmBtnSize index) const {
-        if (index < m_EventsCount) {
-            return m_Events[index];
+    EmButtonEvent* getEvent(EmBtnSize index) const {
+        if (index < m_eventsCount) {
+            return m_events[index];
         }
         return NULL;
     }
     
 protected:
-    EmButtonState m_CurrentState;
-    uint32_t m_CurrentStateMillis;
-    EmButtonEvent** m_Events; 
-    EmBtnSize m_EventsCount;
+    EmButtonState m_currentState;
+    ts_uint32 m_currentStateMillis;
+    EmButtonEvent** m_events; 
+    EmBtnSize m_eventsCount;
 };
 
 // The button linked to an hardware gpio port.
@@ -65,13 +66,13 @@ public:
                  bool inputBuildinPullUp = true, 
                  uint8_t downValue = LOW);
 
-    virtual void Update() override;
+    virtual void update() override;
 
 protected:
     virtual EmButtonState _getHwState();
 
-    uint8_t m_IoPin;
-    uint8_t m_DownValue;
+    uint8_t m_ioPin;
+    uint8_t m_downValue;
 };
 
 // The button linked to an hardware GPIO port using software debouncing.
@@ -87,8 +88,8 @@ public:
 protected:
     virtual EmButtonState _getHwState() override;
 
-    EmTimeout m_DebouncingTimeout;
-    EmButtonState m_NewState;
+    EmTimeout m_debouncingTimeout;
+    EmButtonState m_newState;
 };
 
 #endif

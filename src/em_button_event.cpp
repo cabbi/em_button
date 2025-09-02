@@ -1,109 +1,109 @@
 #include "em_defs.h"
 #include "em_button.h"
     
-void EmButtonDown::UpdateButtonState(EmButton& button,
+void EmButtonDown::updateButtonState(EmButton& button,
                                      uint32_t oldStateMillis,
                                      EmButtonState oldState,
                                      EmButtonState newState) 
 {
     if (oldState != newState && newState == EmButtonState::down) {
-        m_Callback(button, *this, newState, oldStateMillis, m_CallbackUserData);
+        m_callback(button, *this, newState, oldStateMillis, m_callbackUserData);
     }
 }
 
-void EmButtonUp::UpdateButtonState(EmButton& button,
+void EmButtonUp::updateButtonState(EmButton& button,
                                    uint32_t oldStateMillis,
                                    EmButtonState oldState,
                                    EmButtonState newState) 
 {
     if (oldState != newState && newState == EmButtonState::up) {
-        m_Callback(button, *this, newState, oldStateMillis, m_CallbackUserData);
+        m_callback(button, *this, newState, oldStateMillis, m_callbackUserData);
     }
 }
 
-void EmButtonPushed::UpdateButtonState(EmButton& button,
+void EmButtonPushed::updateButtonState(EmButton& button,
                                        uint32_t oldStateMillis,
                                        EmButtonState oldState,
                                        EmButtonState newState) 
 {
     if (oldState != newState && newState == EmButtonState::down) {
-        m_WasDown = true;
+        m_wasDown = true;
     }
-    if (m_WasDown  && oldState != newState && newState == EmButtonState::up) {
-        m_WasDown = false;
-        m_Callback(button, *this, newState, oldStateMillis, m_CallbackUserData);
+    if (m_wasDown  && oldState != newState && newState == EmButtonState::up) {
+        m_wasDown = false;
+        m_callback(button, *this, newState, oldStateMillis, m_callbackUserData);
     }
 }
 
-void EmButtonSteadyMoreThan::UpdateButtonState(EmButton& button,
+void EmButtonSteadyMoreThan::updateButtonState(EmButton& button,
                                                uint32_t oldStateMillis,
                                                EmButtonState oldState,
                                                EmButtonState newState) 
 {
     if (oldState == newState) {
-        if (m_EventTimeout.IsElapsed(true)) {
-            m_EventRaised = true;
-            m_Callback(button, *this, oldState, oldStateMillis, m_CallbackUserData);
+        if (m_eventTimeout.isElapsed(true)) {
+            m_eventRaised = true;
+            m_callback(button, *this, oldState, oldStateMillis, m_callbackUserData);
         }
     } else {
-        m_EventRaised = false;
-        m_EventTimeout.Restart();
+        m_eventRaised = false;
+        m_eventTimeout.restart();
     }
 }
 
-void EmButtonEventsSequence::Reset() {
+void EmButtonEventsSequence::reset() {
     // Reset by restarting the sequence
-    _moveTo(0);
+    moveTo_(0);
 }
 
-void EmButtonEventsSequence::UpdateButtonState(EmButton& button,
+void EmButtonEventsSequence::updateButtonState(EmButton& button,
                                                uint32_t oldStateMillis,
                                                EmButtonState oldState,
                                                EmButtonState newState) 
 {
     // Check if step timeout is elapsed (not valid for first step!)
-    if (!_isFirst() && m_StepTimeoutMillis.IsElapsed(false)) {
-        Reset();
+    if (!isFirst_() && m_stepTimeoutMillis.isElapsed(false)) {
+        reset();
     }
     // Update the current step event state
-    m_Events[m_CurrentStep]->UpdateButtonState(button, 
+    m_events[m_currentStep]->updateButtonState(button, 
                                                oldStateMillis,
                                                oldState,
                                                newState);
 }
 
-void EmButtonEventsSequence::_moveNext()
+void EmButtonEventsSequence::moveNext_()
 {
     // Set next step index    
-    _moveTo(_isLast() ? 0 : m_CurrentStep+1);
+    moveTo_(isLast_() ? 0 : m_currentStep+1);
 }
 
-void EmButtonEventsSequence::_moveTo(EmBtnSize step)
+void EmButtonEventsSequence::moveTo_(EmBtnSize step)
 {
     // Restore current event to original callback if any
-    m_Events[m_CurrentStep]->SetCallback(m_CurrentStepCallback, m_CurrentStepCallbackData);
+    m_events[m_currentStep]->setCallback(m_currentStepCallback, m_currentStepCallbackData);
 
     // Disable all events 
     // NOTE: we enable current only after this loop in case the  
     //       sequence contains same event instance multiple times 
-    for (EmBtnSize i=0; i < m_EventsCount; i++) {
-        m_Events[i]->SetEnabled(false);
+    for (EmBtnSize i=0; i < m_eventsCount; i++) {
+        m_events[i]->setEnabled(false);
     }
     
     // Set and enable current step (see NOTE above)
-    m_CurrentStep = MIN(step, m_EventsCount-1);
-    m_Events[m_CurrentStep]->SetEnabled(true);
+    m_currentStep = MIN(step, m_eventsCount-1);
+    m_events[m_currentStep]->setEnabled(true);
 
     // Replace the user defined callback if this is the current event
-    m_CurrentStepCallback = m_Events[m_CurrentStep]->GetCallback();
-    m_CurrentStepCallbackData = m_Events[m_CurrentStep]->GetCallbackUserData();
-    m_Events[m_CurrentStep]->SetCallback(&EmButtonEventsSequence::_eventCallback, this);
+    m_currentStepCallback = m_events[m_currentStep]->getCallback();
+    m_currentStepCallbackData = m_events[m_currentStep]->getCallbackUserData();
+    m_events[m_currentStep]->setCallback(&EmButtonEventsSequence::eventCallback_, this);
 
     // Restart the step timeout
-    m_StepTimeoutMillis.Restart();
+    m_stepTimeoutMillis.restart();
 }
 
-void EmButtonEventsSequence::_eventCallback(EmButton& button, 
+void EmButtonEventsSequence::eventCallback_(EmButton& button, 
                                             EmButtonEvent& event,
                                             EmButtonState state, 
                                             uint32_t stateDurationMs,
@@ -111,21 +111,21 @@ void EmButtonEventsSequence::_eventCallback(EmButton& button,
 {
     EmButtonEventsSequence* thisEvent = static_cast<EmButtonEventsSequence*>(pEvent);
     // Any defined event callback
-    if (thisEvent->m_CurrentStepCallback != NULL) {
-        thisEvent->m_CurrentStepCallback(button, 
+    if (thisEvent->m_currentStepCallback != NULL) {
+        thisEvent->m_currentStepCallback(button, 
                                          event, 
                                          state, 
                                          stateDurationMs, 
-                                         thisEvent->m_CurrentStepCallbackData);
+                                         thisEvent->m_currentStepCallbackData);
     }
     // Sequence is completed, lets call final event callback
-    if (thisEvent->_isLast()) {
-        thisEvent->m_Callback(button, 
+    if (thisEvent->isLast_()) {
+        thisEvent->m_callback(button, 
                               event, 
                               state, 
                               stateDurationMs, 
-                              thisEvent->m_CallbackUserData);
+                              thisEvent->m_callbackUserData);
     }
     // Move to next event in the sequence
-    thisEvent->_moveNext();
+    thisEvent->moveNext_();
 }

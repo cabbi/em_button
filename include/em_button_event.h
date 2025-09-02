@@ -7,46 +7,46 @@
 // The base abstract button event class
 class EmButtonEvent {
 public:
-    EmButtonEvent(EmButtonEventCallback callback,
+    EmButtonEvent(const EmButtonEventCallback callback,
                   bool enabled=true,
                   void* callbackUserData=NULL)
-     : m_Callback(callback),
-       m_CallbackUserData(callbackUserData),
-       m_IsEnabled(enabled) {}
+     : m_callback(callback),
+       m_callbackUserData(callbackUserData),
+       m_isEnabled(enabled) {}
 
-    bool IsEnabled() const {
-        return m_IsEnabled;
+    bool isEnabled() const {
+        return m_isEnabled;
     }
 
-    void SetEnabled(bool enabled) {
-        m_IsEnabled = enabled;
+    void setEnabled(bool enabled) {
+        m_isEnabled = enabled;
     }
 
-    EmButtonEventCallback GetCallback() const {
-        return m_Callback;
+    EmButtonEventCallback getCallback() const {
+        return m_callback;
     }
     
-    void* GetCallbackUserData() const {
-        return m_CallbackUserData;
+    void* getCallbackUserData() const {
+        return m_callbackUserData;
     }
 
-    void SetCallback(EmButtonEventCallback callback,
-                     void* callbackUserData=NULL) { 
-        m_Callback = callback;
-        m_CallbackUserData = callbackUserData;
+    void setCallback(EmButtonEventCallback callback,
+                     void* callbackUserData=NULL) {
+        m_callback = callback;
+        m_callbackUserData = callbackUserData;
     }
 
-    // A button calls this method on each 'Update' call so that event
+    // A button calls this method on each 'update' call so that event
     // can react even if state did not change (i.e. oldState == newState)
-    virtual void UpdateButtonState(EmButton& button,
+    virtual void updateButtonState(EmButton& button,
                                    uint32_t oldStateMillis,
                                    EmButtonState oldState,
                                    EmButtonState newState) = 0;
 
 protected:
-    EmButtonEventCallback m_Callback;
-    void* m_CallbackUserData;
-    bool m_IsEnabled;
+    EmButtonEventCallback m_callback;
+    void* m_callbackUserData;
+    bool m_isEnabled;
 };
 
 // The button down event class
@@ -59,7 +59,7 @@ public:
                  void* callbackUserData=NULL) 
      : EmButtonEvent(callback, enabled, callbackUserData) {}
     
-    virtual void UpdateButtonState(EmButton& button,
+    virtual void updateButtonState(EmButton& button,
                                    uint32_t oldStateMillis,
                                    EmButtonState oldState,
                                    EmButtonState newState) override;
@@ -75,7 +75,7 @@ public:
                void* callbackUserData=NULL) 
      : EmButtonEvent(callback, enabled, callbackUserData) {}
 
-    virtual void UpdateButtonState(EmButton& button,
+    virtual void updateButtonState(EmButton& button,
                                    uint32_t oldStateMillis,
                                    EmButtonState oldState,
                                    EmButtonState newState) override;
@@ -90,15 +90,15 @@ public:
                    bool enabled=true,
                    void* callbackUserData=NULL) 
      : EmButtonEvent(callback, enabled, callbackUserData),
-       m_WasDown(false) {}
+       m_wasDown(false) {}
 
-    virtual void UpdateButtonState(EmButton& button,
+    virtual void updateButtonState(EmButton& button,
                                    uint32_t oldStateMillis,
                                    EmButtonState oldState,
                                    EmButtonState newState) override;
 
 protected:
-    bool m_WasDown;
+    bool m_wasDown;
 };
 
 // The events sequence class.
@@ -119,60 +119,60 @@ public:
                            bool enabled=true,
                            void* callbackUserData=NULL) 
      : EmButtonEvent(callback, enabled, callbackUserData),
-       m_Events(events),
-       m_EventsCount(eventsCount), 
-       m_CurrentStep(0),
-       m_CurrentStepCallback(m_Events[0]->GetCallback()),
-       m_CurrentStepCallbackData(m_Events[0]->GetCallbackUserData()),
-       m_StepTimeoutMillis(stepTimeoutMillis) {
-        Reset();
+       m_events(events),
+       m_eventsCount(eventsCount), 
+       m_currentStep(0),
+       m_currentStepCallback(m_events[0]->getCallback()),
+       m_currentStepCallbackData(m_events[0]->getCallbackUserData()),
+       m_stepTimeoutMillis(stepTimeoutMillis) {
+        reset();
        }
 
     // Resets the sequence by awaiting for the first one to be completed
-    void Reset();
+    void reset();
 
-    virtual void UpdateButtonState(EmButton& button,
+    virtual void updateButtonState(EmButton& button,
                                    uint32_t oldStateMillis,
                                    EmButtonState oldState,
                                    EmButtonState newState) override;
 
-    EmBtnSize GetCurrentStep() const {
-        return m_CurrentStep;
+    EmBtnSize getCurrentStep() const {
+        return m_currentStep;
     }
 
-    EmBtnSize GetEventsCount() const {
-        return m_EventsCount;
+    EmBtnSize getEventsCount() const {
+        return m_eventsCount;
     }
 
-    EmButtonEvent* GetEvent(EmBtnSize index) const {
-        if (index < m_EventsCount) {
-            return m_Events[index];
+    EmButtonEvent* getEvent(EmBtnSize index) const {
+        if (index < m_eventsCount) {
+            return m_events[index];
         }
         return NULL;
     }
 
 protected:
-    bool _isLast() {
-        return m_CurrentStep >= m_EventsCount-1; 
+    bool isLast_() {
+        return m_currentStep >= m_eventsCount-1; 
     }
-    bool _isFirst() {
-        return m_CurrentStep == 0; 
+    bool isFirst_() {
+        return m_currentStep == 0; 
     }
-    void _moveNext();
-    void _moveTo(EmBtnSize step);
-    static void _eventCallback(EmButton& button, 
+    void moveNext_();
+    void moveTo_(EmBtnSize step);
+    static void eventCallback_(EmButton& button, 
                                EmButtonEvent& event,
                                EmButtonState state, 
                                uint32_t stateDurationMs,
                                void* pEvent);
     
     // Member vars
-    EmButtonEvent** m_Events; 
-    EmBtnSize m_EventsCount;
-    EmBtnSize m_CurrentStep;
-    EmButtonEventCallback m_CurrentStepCallback;
-    void* m_CurrentStepCallbackData;
-    EmTimeout m_StepTimeoutMillis;
+    EmButtonEvent** m_events; 
+    EmBtnSize m_eventsCount;
+    EmBtnSize m_currentStep;
+    EmButtonEventCallback m_currentStepCallback;
+    void* m_currentStepCallbackData;
+    EmTimeout m_stepTimeoutMillis;
 };
 
 // The abstract timed button event class
@@ -183,29 +183,29 @@ public:
                        bool enabled=true,
                        void* callbackUserData=NULL) 
      : EmButtonEvent(callback, enabled, callbackUserData), 
-       m_EventTimeout(eventDurationMillis) {}
+       m_eventTimeout(eventDurationMillis) {}
 
-    void SetEnabled(bool enabled, bool restart) {
-        m_IsEnabled = enabled;
+    void setEnabled(bool enabled, bool restart) {
+        m_isEnabled = enabled;
         if (restart) {
-            m_EventTimeout.Restart();
+            m_eventTimeout.restart();
         }
     }
 
-    void Restart() {
-        m_EventTimeout.Restart();
+    void restart() {
+        m_eventTimeout.restart();
     }
 
-    virtual void SetDuration(uint32_t stateDurationMillis, bool restart=true) {
-        m_EventTimeout.SetTimeout(stateDurationMillis, restart);
+    virtual void setDuration(uint32_t stateDurationMillis, bool restart=true) {
+        m_eventTimeout.setTimeout(stateDurationMillis, restart);
     }
 
-    virtual uint32_t GetDurationMillis() {
-        return m_EventTimeout.GetTimeoutMs();
+    virtual uint32_t getDurationMillis() {
+        return m_eventTimeout.getTimeoutMs();
     }
 
 protected:
-    EmTimeout m_EventTimeout;
+    EmTimeout m_eventTimeout;
 };
 
 // The generic timed button event class
@@ -220,32 +220,32 @@ public:
                             bool enabled=true,
                             void* callbackUserData=NULL) 
      : EmButtonTimedEvent(callback, stateDurationMillis, enabled, callbackUserData),
-       m_WasEventState(false),
-       m_EventRaised(false) {}
+       m_wasEventState(false),
+       m_eventRaised(false) {}
 
-    virtual void UpdateButtonState(EmButton& button,
+    virtual void updateButtonState(EmButton& button,
                                    uint32_t oldStateMillis,
                                    EmButtonState oldState,
                                    EmButtonState newState) override {
         if (newState != eventState) {
-            m_WasEventState = false;
-            m_EventRaised = false;
+            m_wasEventState = false;
+            m_eventRaised = false;
         } else
-        if (!m_WasEventState && oldState != newState) {
-            m_WasEventState = true;
-            m_EventTimeout.Restart();
+        if (!m_wasEventState && oldState != newState) {
+            m_wasEventState = true;
+            m_eventTimeout.restart();
         } else
-        if (!m_EventRaised && m_WasEventState && oldState == newState) {
-            if (m_EventTimeout.IsElapsed(false)) {
-                m_EventRaised = true;
-                m_Callback(button, *this, oldState, oldStateMillis, m_CallbackUserData);
+        if (!m_eventRaised && m_wasEventState && oldState == newState) {
+            if (m_eventTimeout.isElapsed(false)) {
+                m_eventRaised = true;
+                m_callback(button, *this, oldState, oldStateMillis, m_callbackUserData);
             }
         } 
     }
 
 protected:
-    bool m_WasEventState;
-    bool m_EventRaised;
+    bool m_wasEventState;
+    bool m_eventRaised;
 };
 
 class EmButtonDownMoreThan: public EmButtonStateTimedEvent<EmButtonState::down> {
@@ -270,27 +270,27 @@ public:
                              bool enabled=true,
                              void* callbackUserData=NULL) 
      : EmButtonTimedEvent(callback, eventDurationMillis, enabled, callbackUserData),
-       m_WasDown(false) {}
+       m_wasDown(false) {}
 
-    virtual void UpdateButtonState(EmButton& button,
+    virtual void updateButtonState(EmButton& button,
                                    uint32_t oldStateMillis,
                                    EmButtonState oldState,
                                    EmButtonState newState) override {
-        if (!m_WasDown && oldState != newState && newState == EmButtonState::down) {
-            m_WasDown = true;
-            m_EventTimeout.Restart();
+        if (!m_wasDown && oldState != newState && newState == EmButtonState::down) {
+            m_wasDown = true;
+            m_eventTimeout.restart();
         } else
-        if (m_WasDown && oldState != newState && newState == EmButtonState::up) {
-            m_WasDown = false;
-            if ((eventType == EmButtonTimeEvent::MoreThan && m_EventTimeout.IsElapsed(false)) ||
-                (eventType == EmButtonTimeEvent::LessThan && !m_EventTimeout.IsElapsed(false))) {
-                m_Callback(button, *this, oldState, oldStateMillis, m_CallbackUserData);
+        if (m_wasDown && oldState != newState && newState == EmButtonState::up) {
+            m_wasDown = false;
+            if ((eventType == EmButtonTimeEvent::MoreThan && m_eventTimeout.isElapsed(false)) ||
+                (eventType == EmButtonTimeEvent::LessThan && !m_eventTimeout.isElapsed(false))) {
+                m_callback(button, *this, oldState, oldStateMillis, m_callbackUserData);
             }
         }
     }
 
 protected:
-    bool m_WasDown;
+    bool m_wasDown;
 };
 
 class EmButtonPushedMoreThan: public EmButtonPushedTimedEvent<EmButtonTimeEvent::MoreThan> {
@@ -314,15 +314,15 @@ public:
                            bool enabled=true,
                            void* callbackUserData=NULL) 
      : EmButtonTimedEvent(callback, inactivityDurationMillis, enabled, callbackUserData),
-       m_EventRaised(false) {}
+       m_eventRaised(false) {}
 
-    virtual void UpdateButtonState(EmButton& button,
+    virtual void updateButtonState(EmButton& button,
                                    uint32_t oldStateMillis,
                                    EmButtonState oldState,
                                    EmButtonState newState) override;
 
 protected:
-    bool m_EventRaised;
+    bool m_eventRaised;
 };
 
 #endif
